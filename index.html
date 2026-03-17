@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shuffled Letters</title>
+<title>Shuffled</title>
 
 <style>
 :root{
-  --bg:#f7f7f2;
-  --text:#6d49ff;
+ --bg:#f7f7f2;
+  --text:#000000;
   --muted:#8a8a8a;
   --line:#dcdcdc;
 }
@@ -25,6 +25,7 @@ body{
 
 /* SIDEBAR */
 .sidebar{
+  color:var(--text);
   position:fixed;
   left:0;
   top:0;
@@ -41,7 +42,7 @@ body{
 }
 
 .sidebar p{
-  line-height:1.4;
+   line-height:1.4;
 }
 
 .links{
@@ -156,6 +157,7 @@ pre{
   position:absolute;
   font-size:12px;
   opacity:0.5;
+  color:var(--text);
 }
 </style>
 </head>
