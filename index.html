@@ -8,7 +8,7 @@
 <style>
 :root{
   --bg:#f7f7f2;
-  --text:#6d49ff;
+  --text:#000000;
   --muted:#8a8a8a;
   --line:#dcdcdc;
   --window:#ffffff;
@@ -40,6 +40,8 @@ body{
   padding:20px;
   border-right:1px dashed var(--line);
   font-size:12px;
+  background:var(--bg);
+  z-index:20;
 }
 
 .logo{
@@ -116,7 +118,12 @@ body{
   margin-left:260px;
   height:100vh;
   position:relative;
-  overflow:hidden;
+  overflow:auto;
+}
+
+.timeline-canvas{
+  position:relative;
+  min-height:2200px;
 }
 
 .grid-line{
@@ -151,14 +158,14 @@ body{
   opacity:0.5;
   pointer-events:none;
   user-select:none;
+  color:var(--text);
 }
 
 /* WINDOW */
 .window{
   position:absolute;
-  top:50%;
-  left:30%;
-  transform:translateY(-50%);
+  top:420px;
+  left:420px;
   width:560px;
   background:var(--window);
   border:1px solid #cfcfcf;
@@ -200,6 +207,7 @@ body{
   line-height:1.6;
   max-height:72vh;
   overflow:auto;
+  background:#fff;
 }
 
 /* FORM + BUTTONS */
@@ -287,9 +295,8 @@ pre{
   }
   .window{
     width:90vw;
-    left:5vw;
-    top:20px;
-    transform:none;
+    left:5vw !important;
+    top:20px !important;
   }
 }
 </style>
@@ -317,8 +324,10 @@ pre{
   </div>
 </div>
 
-<div class="main" id="main">
-  <div class="year">2025</div>
+<div class="main" id="mainScroller">
+  <div class="timeline-canvas" id="timelineCanvas">
+    <div class="year">2025</div>
+  </div>
 </div>
 
 <div class="window" id="window">
@@ -337,13 +346,21 @@ pre{
 </div>
 
 <script>
+/* DOM */
+const timelineCanvas = document.getElementById('timelineCanvas');
+const archiveList = document.getElementById('archiveList');
+const content = document.getElementById('content');
+const windowTitle = document.getElementById('windowTitle');
+const openGeneratorBtn = document.getElementById('openGeneratorBtn');
+const openIntroBtn = document.getElementById('openIntroBtn');
+
 /* GRID */
-const main = document.getElementById('main');
 for(let i=1;i<6;i++){
   const line = document.createElement('div');
   line.className = 'grid-line';
   line.style.left = (i * 18) + '%';
-  main.appendChild(line);
+  line.style.height = '2200px';
+  timelineCanvas.appendChild(line);
 }
 
 const months = ['Sep','Aug','Jul','Jun','May'];
@@ -352,7 +369,7 @@ months.forEach((m,i)=>{
   month.className = 'month';
   month.textContent = m;
   month.style.left = (8 + i * 18) + '%';
-  main.appendChild(month);
+  timelineCanvas.appendChild(month);
 });
 
 /* GENERATOR DATA */
@@ -439,7 +456,7 @@ const wordPool = [
 ];
 
 /* ARCHIVE DATA
-   Paste your full anonymized file content between the backticks.
+   Paste your full redacted archive text between the backticks.
 */
 const rawArchive = `
 ===== LETTER 01 =====
@@ -1797,63 +1814,34 @@ to: █████
 Dear █████, 
 
 Thank you for your message. I didn't receive any news from █████ as he ghosted me, but I wouldn't be able to come by anyway - I am unfortunately, really busy today. I feel bad about you feeling sick - but I know you will eventually get healthy - that reassures me and gives me more purpose in a life-meaning sense. As a solution to the current situation I propose the following - I will come by your place this evening and bring you your dear belongings. I will not stay for long and leave - not to get affected by the deadliness of sickness. Let me know if that suits you. 
-
 `;
 
 function parseArchive(raw) {
-  const blocks = raw
-    .split(/===== LETTER\\s+\\d+\\s+=====/g)
-    .map(block => block.trim())
-    .filter(Boolean);
+  const matches = raw.match(/===== LETTER\\s+\\d+\\s+=====[\\s\\S]*?(?====== LETTER\\s+\\d+\\s+=====|$)/g);
 
-  return blocks.map((block, index) => {
-    const lines = block.split('\\n').map(l => l.trimEnd());
+  if (!matches) return [];
 
-    let title = 'Letter ' + String(index + 1).padStart(2, '0');
-    let bodyLines = [];
+  return matches.map((block, index) => {
+    const cleaned = block
+      .replace(/===== LETTER\\s+\\d+\\s+=====/, '')
+      .replace(/^\\s*\\[date\\]\\s*$/gim, '')
+      .replace(/^\\s*from:.*$/gim, '')
+      .replace(/^\\s*to:.*$/gim, '')
+      .trim();
 
-    for (const line of lines) {
-      const lower = line.toLowerCase().trim();
-
-      if (
-        lower === '[date]' ||
-        lower.startsWith('from:') ||
-        lower.startsWith('to:')
-      ) {
-        continue;
-      }
-
-      bodyLines.push(line);
-    }
-
-    const body = bodyLines.join('\\n').trim();
-    const firstMeaningful = body.split('\\n').find(line => line.trim()) || '';
-
-    if (firstMeaningful) {
-      const shortFirst = firstMeaningful.length > 52
-        ? firstMeaningful.slice(0, 52) + '…'
-        : firstMeaningful;
-      title += ' — ' + shortFirst;
-    }
+    const firstLine = cleaned.split('\\n').find(line => line.trim()) || `Letter ${index + 1}`;
 
     return {
       id: index + 1,
-      title,
-      body
+      title: `Letter ${String(index + 1).padStart(2, '0')} — ${firstLine.slice(0, 42)}`,
+      body: cleaned
     };
   });
 }
 
 const archiveLetters = parseArchive(rawArchive);
+console.log('archiveLetters:', archiveLetters);
 
-/* DOM */
-const archiveList = document.getElementById('archiveList');
-const content = document.getElementById('content');
-const windowTitle = document.getElementById('windowTitle');
-const openGeneratorBtn = document.getElementById('openGeneratorBtn');
-const openIntroBtn = document.getElementById('openIntroBtn');
-
-/* HELPERS */
 function escapeHtml(str) {
   return str
     .replaceAll('&', '&amp;')
@@ -1867,14 +1855,14 @@ function randomItem(arr){
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-/* ARCHIVE RENDER */
+/* ARCHIVE LIST */
 function renderArchiveList(){
   archiveList.innerHTML = '';
 
   if (!archiveLetters.length) {
     const empty = document.createElement('div');
     empty.className = 'note';
-    empty.textContent = 'archive is empty until rawArchive is filled';
+    empty.textContent = 'archive is empty — rawArchive was not parsed';
     archiveList.appendChild(empty);
     return;
   }
@@ -1905,6 +1893,23 @@ function openLetter(id){
 }
 
 /* GENERATOR */
+function clearWords(){
+  document.querySelectorAll('.word').forEach(word => word.remove());
+}
+
+function generateWords(){
+  clearWords();
+
+  for(let i = 0; i < 120; i++){
+    const span = document.createElement('span');
+    span.className = 'word';
+    span.innerText = randomItem(wordPool);
+    span.style.top = Math.random() * 2100 + 'px';
+    span.style.left = Math.random() * (timelineCanvas.offsetWidth - 80) + 'px';
+    timelineCanvas.appendChild(span);
+  }
+}
+
 function openGenerator(){
   windowTitle.textContent = 'generator';
 
@@ -1917,23 +1922,6 @@ function openGenerator(){
     </div>
     <div class="note">the words will briefly scatter before the letter appears</div>
   `;
-}
-
-function clearWords(){
-  document.querySelectorAll('.word').forEach(word => word.remove());
-}
-
-function generateWords(){
-  clearWords();
-
-  for(let i = 0; i < 120; i++){
-    const span = document.createElement('span');
-    span.className = 'word';
-    span.innerText = randomItem(wordPool);
-    span.style.top = Math.random() * 100 + '%';
-    span.style.left = Math.random() * 100 + '%';
-    main.appendChild(span);
-  }
 }
 
 function startWordSequence(){
