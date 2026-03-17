@@ -459,7 +459,9 @@ const wordPool = [
    Paste your full redacted archive text between the backticks.
 */
 const rawArchive = `
+
 ===== LETTER 01 =====
+
 [date]
 from: █████
 to: █████
@@ -1813,9 +1815,8 @@ to: █████
 
 Dear █████, 
 
-Thank you for your message. I didn't receive any news from █████ as he ghosted me, but I wouldn't be able to come by anyway - I am unfortunately, really busy today. I feel bad about you feeling sick - but I know you will eventually get healthy - that reassures me and gives me more purpose in a life-meaning sense. As a solution to the current situation I propose the following - I will come by your place this evening and bring you your dear belongings. I will not stay for long and leave - not to get affected by the deadliness of sickness. Let me know if that suits you. 
+Thank you for your message. I didn't receive any news from █████ as he ghosted me, but I wouldn't be able to come by anyway - I am unfortunately, really busy today. I feel bad about you feeling sick - but I know you will eventually get healthy - that reassures me and gives me more purpose in a life-meaning sense. As a solution to the current situation I propose the following - I will come by your place this evening and bring you your dear belongings. I will not stay for long and leave - not to get affected by the deadliness of sickness. Let me know if that suits you.
 `;
-
 function parseArchive(raw) {
   const parts = raw.split('===== LETTER');
   const letters = [];
