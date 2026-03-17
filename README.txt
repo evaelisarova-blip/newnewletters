@@ -1,0 +1,1 @@
+Upload only index.html to your GitHub repo root and enable GitHub Pages from main/root.
