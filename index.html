@@ -1817,30 +1817,48 @@ Thank you for your message. I didn't receive any news from █████ as he
 `;
 
 function parseArchive(raw) {
-  const matches = raw.match(/===== LETTER\\s+\\d+\\s+=====[\\s\\S]*?(?====== LETTER\\s+\\d+\\s+=====|$)/g);
+  const parts = raw.split('===== LETTER');
+  const letters = [];
 
-  if (!matches) return [];
+  for (let i = 1; i < parts.length; i++) {
+    let block = parts[i].trim();
 
-  return matches.map((block, index) => {
-    const cleaned = block
-      .replace(/===== LETTER\\s+\\d+\\s+=====/, '')
-      .replace(/^\\s*\\[date\\]\\s*$/gim, '')
-      .replace(/^\\s*from:.*$/gim, '')
-      .replace(/^\\s*to:.*$/gim, '')
-      .trim();
+    const firstNewline = block.indexOf('\n');
+    if (firstNewline !== -1) {
+      block = block.slice(firstNewline + 1).trim();
+    }
 
-    const firstLine = cleaned.split('\\n').find(line => line.trim()) || `Letter ${index + 1}`;
+    const lines = block.split('\n');
+    const cleanedLines = [];
 
-    return {
-      id: index + 1,
-      title: `Letter ${String(index + 1).padStart(2, '0')} — ${firstLine.slice(0, 42)}`,
+    for (let line of lines) {
+      const trimmed = line.trim();
+
+      if (
+        trimmed === '[date]' ||
+        trimmed.startsWith('from:') ||
+        trimmed.startsWith('to:')
+      ) {
+        continue;
+      }
+
+      cleanedLines.push(line);
+    }
+
+    const cleaned = cleanedLines.join('\n').trim();
+    const firstLine = cleanedLines.find(line => line.trim()) || `Letter ${i}`;
+
+    letters.push({
+      id: i,
+      title: `Letter ${String(i).padStart(2, '0')} — ${firstLine.slice(0, 42)}`,
       body: cleaned
-    };
-  });
-}
+    });
+  }
 
+  return letters;
+}
 const archiveLetters = parseArchive(rawArchive);
-console.log('archiveLetters:', archiveLetters);
+  console.log('archiveLetters:', archiveLetters);
 
 function escapeHtml(str) {
   return str
