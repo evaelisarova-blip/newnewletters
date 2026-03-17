@@ -1,552 +1,322 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Love Letter.</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shuffled Letters</title>
 
-  <style>
-    :root{
-      --bg:#ffffff;
-      --paper:#ffffff;
-      --text:#000000;
-      --muted:#8a8a8a;
-      --red:#ff2b57;
-      --grid:rgba(0,0,0,0.05);
-      --border:#000000;
-    }
+<style>
+:root{
+  --bg:#f7f7f2;
+  --text:#6d49ff;
+  --muted:#8a8a8a;
+  --line:#dcdcdc;
+}
 
-    *{ box-sizing:border-box; }
+*{box-sizing:border-box;}
 
-    html, body{
-      margin:0;
-      padding:0;
-      min-height:100%;
-      background:var(--bg);
-      color:var(--text);
-      font-family:"Courier New", monospace;
-    }
+body{
+  margin:0;
+  font-family: monospace;
+  background:var(--bg);
+  color:var(--text);
+  overflow:hidden;
+}
 
-    body{
-      overflow:hidden;
-      image-rendering:pixelated;
-      letter-spacing:0.02em;
-    }
+/* SIDEBAR */
+.sidebar{
+  position:fixed;
+  left:0;
+  top:0;
+  width:260px;
+  height:100vh;
+  padding:20px;
+  border-right:1px dashed var(--line);
+  font-size:12px;
+}
 
-    .grid{
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      opacity:0.8;
-      background-image:
-        linear-gradient(to right, var(--grid) 1px, transparent 1px),
-        linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
-      background-size:32px 32px;
-    }
+.logo{
+  margin-bottom:20px;
+  font-size:14px;
+}
 
-    .tag{
-      position:fixed;
-      top:16px;
-      left:16px;
-      z-index:20;
-      border:1px solid var(--border);
-      background:#fff;
-      padding:4px 8px;
-      font-size:10px;
-      text-transform:uppercase;
-      letter-spacing:0.24em;
-    }
+.sidebar p{
+  line-height:1.4;
+}
 
-    .dot{
-      position:fixed;
-      top:16px;
-      right:16px;
-      width:12px;
-      height:12px;
-      background:var(--red);
-      z-index:20;
-    }
+.links{
+  margin-top:20px;
+}
 
-    .screen{
-      min-height:100vh;
-      display:none;
-      position:relative;
-      z-index:2;
-    }
+.footer{
+  position:absolute;
+  bottom:20px;
+  font-size:11px;
+}
 
-    .screen.active{
-      display:flex;
-    }
+/* GRID */
+.main{
+  margin-left:260px;
+  height:100vh;
+  position:relative;
+}
 
-    .center{
-      width:100%;
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:28px;
-    }
+.grid-line{
+  position:absolute;
+  top:0;
+  height:100%;
+  border-left:1px dashed var(--line);
+}
 
-    .title-wrap{
-      max-width:1080px;
-      text-align:center;
-      cursor:pointer;
-    }
+.year{
+  position:absolute;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:12px;
+  color:#999;
+}
 
-    .eyebrow{
-      margin:0 0 28px 0;
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:0.36em;
-      color:var(--muted);
-    }
+/* WINDOW */
+.window{
+  position:absolute;
+  top:50%;
+  left:30%;
+  transform:translateY(-50%);
+  width:360px;
+  background:white;
+  border:1px solid #ccc;
+  box-shadow:0 8px 20px rgba(0,0,0,0.1);
+}
 
-    h1{
-      margin:0 0 20px 0;
-      font-size:clamp(46px, 10vw, 110px);
-      line-height:0.9;
-      text-transform:uppercase;
-      letter-spacing:-0.06em;
-      font-weight:400;
-    }
+.window-header{
+  height:24px;
+  background:linear-gradient(#eaeaea,#dcdcdc);
+  display:flex;
+  align-items:center;
+  padding:0 8px;
+}
 
-    .redline{
-      width:88px;
-      height:2px;
-      background:var(--red);
-      margin:0 auto 28px auto;
-    }
+.dots{
+  display:flex;
+  gap:6px;
+}
 
-    .intro{
-      max-width:820px;
-      margin:0 auto;
-      font-size:14px;
-      line-height:2;
-      color:#333;
-    }
+.dot{
+  width:8px;
+  height:8px;
+  background:#999;
+  border-radius:50%;
+}
 
-    .hint{
-      margin-top:42px;
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:0.28em;
-      color:var(--muted);
-    }
+.title{
+  margin:auto;
+  font-size:10px;
+  color:#555;
+}
 
-    #wordsScreen{
-      overflow:hidden;
-      background:#fff;
-    }
+.window-body{
+  padding:20px;
+  font-size:12px;
+}
 
-    .word{
-      position:absolute;
-      user-select:none;
-      text-transform:uppercase;
-      letter-spacing:0.05em;
-      font-family:"Courier New", monospace;
-      opacity:0.62;
-      color:#111;
-      white-space:nowrap;
-    }
+/* INPUT */
+input{
+  width:100%;
+  border:none;
+  border-bottom:1px solid #aaa;
+  background:none;
+  padding:6px 0;
+  color:var(--text);
+  font-family:monospace;
+}
 
-    .panel{
-      width:min(760px, calc(100vw - 40px));
-      border:2px solid var(--border);
-      background:var(--paper);
-      padding:30px;
-      box-shadow:4px 4px 0 0 #000;
-    }
+button{
+  margin-top:10px;
+  border:1px solid var(--text);
+  background:none;
+  color:var(--text);
+  padding:6px 10px;
+  cursor:pointer;
+  font-family:monospace;
+}
 
-    h2{
-      margin:0 0 10px 0;
-      font-size:clamp(30px, 6vw, 60px);
-      line-height:1;
-      text-transform:uppercase;
-      letter-spacing:-0.05em;
-      font-weight:400;
-    }
+button:hover{
+  background:var(--text);
+  color:white;
+}
 
-    .small{
-      margin:0 0 28px 0;
-      max-width:520px;
-      font-size:13px;
-      line-height:1.8;
-      color:#444;
-    }
+/* LETTER */
+pre{
+  white-space:pre-wrap;
+  line-height:1.6;
+}
 
-    .stack{
-      display:grid;
-      gap:20px;
-    }
-
-    input{
-      width:100%;
-      border:none;
-      border-bottom:2px solid #000;
-      background:transparent;
-      padding:12px 0;
-      font-size:28px;
-      outline:none;
-      color:#000;
-      font-family:"Courier New", monospace;
-    }
-
-    input::placeholder{
-      color:#b4b4b4;
-    }
-
-    button{
-      appearance:none;
-      border:2px solid #000;
-      background:#fff;
-      color:#000;
-      padding:12px 18px;
-      font-family:"Courier New", monospace;
-      font-size:13px;
-      text-transform:uppercase;
-      letter-spacing:0.22em;
-      cursor:pointer;
-      transition:transform .08s ease;
-    }
-
-    button:hover{
-      transform:translate(-1px,-1px);
-      box-shadow:4px 4px 0 0 #000;
-    }
-
-    #generateBtn{
-      background:#000;
-      color:#fff;
-    }
-
-    #letterScreen .center{
-      align-items:flex-start;
-      padding:40px 24px;
-    }
-
-    .letter{
-      width:min(920px, calc(100vw - 40px));
-      border:2px solid #000;
-      background:#fff;
-      padding:36px;
-      box-shadow:4px 4px 0 0 #000;
-    }
-
-    .topline{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      margin-bottom:26px;
-    }
-
-    .reset{
-      border:none;
-      background:transparent;
-      box-shadow:none;
-      padding:0;
-      text-decoration:underline;
-      font-size:11px;
-      color:var(--muted);
-      letter-spacing:0.22em;
-    }
-
-    pre{
-      margin:0;
-      white-space:pre-wrap;
-      word-break:break-word;
-      font-family:"Courier New", monospace;
-      font-size:17px;
-      line-height:2;
-      color:#000;
-    }
-
-    .cursor{
-      opacity:1;
-      animation:blink 1s steps(1) infinite;
-    }
-
-    @keyframes blink{
-      0%, 49% { opacity:1; }
-      50%, 100% { opacity:0; }
-    }
-
-    @media (max-width: 700px){
-      .tag, .dot{ display:none; }
-      .center{ padding:18px; }
-      .panel, .letter{
-        width:calc(100vw - 24px);
-        padding:22px;
-      }
-      .intro{
-        font-size:13px;
-        line-height:1.9;
-      }
-      input{
-        font-size:22px;
-      }
-      pre{
-        font-size:15px;
-        line-height:1.85;
-      }
-    }
-  </style>
+.word{
+  position:absolute;
+  font-size:12px;
+  opacity:0.5;
+}
+</style>
 </head>
+
 <body>
-  <div class="grid"></div>
-  <div class="tag"> E. M. </div>
-  <div class="dot"></div>
 
-  <section id="titleScreen" class="screen active">
-    <div class="center">
-      <div class="title-wrap" id="titleTrigger" tabindex="0" role="button">
-        <h1>A<br> Love Letter</h1>
-        <div class="redline"></div>
-        <p class="intro">
-          A real e-mail correspondence between two people, one in Zurich and the other in Tiflis, was reduced to symbols, counted, broken apart, and returned as language again. The letters were shuffled into unstable combinations and asked to gather themselves back into love letters.
-        </p>
-        <p class="hint">Click to proceed</p>
-      </div>
-    </div>
-  </section>
+<div class="sidebar">
+  <div class="logo">/\\__—|-.-</div>
 
-  <section id="wordsScreen" class="screen"></section>
+  <p>
+    A radically transparent archive<br>
+    of correspondence turned into code.
+  </p>
 
-  <section id="formScreen" class="screen">
-    <div class="center">
-      <div class="panel">
-        <p class="eyebrow">Ready letter system</p>
-        <h2>Enter a name</h2>
-        <p class="small">
-          The system will generate a slightly unstable love letter from a real correspondence.
-        </p>
-        <div class="stack">
-          <input id="nameInput" placeholder="Anna" />
-          <button id="generateBtn" type="button">Generate</button>
-        </div>
-      </div>
-    </div>
-  </section>
+  <div class="links">
+    Imagine<br>
+    Bouchon Studio<br>
+    London Short Film Festival<br>
+    Park Pictures<br>
+    1201.am<br>
+    Depop Games<br>
+  </div>
 
-  <section id="letterScreen" class="screen">
-    <div class="center">
-      <div class="letter">
-        <div class="topline">
-          <p class="eyebrow" style="margin:0">Generated letter</p>
-          <button class="reset" id="resetBtn" type="button">Reset</button>
-        </div>
-        <pre id="letterText"></pre>
-      </div>
-    </div>
-  </section>
+  <div class="footer">
+    ig: @letters<br>
+    email: contact@mail.com
+  </div>
+</div>
 
+<div class="main" id="main">
+
+  <div class="year">2024</div>
+
+  <!-- GRID -->
   <script>
-    const phrasePool = [
-      'I miss you.',
-      'I think of you a lot.',
-      'It was very weird not having a weekend with you.',
-      'I like missing you.',
-      'It’s romantic.',
-      'There’s a soft sadness in it.',
-      'What I feel most often lately is love.',
-      'There’s less pressure. Just space.',
-      'I feel like I can trust you.',
-      'Thank you for the softness.',
-      'You’ve been so steady with me.',
-      'I enjoy our time together.',
-      'Sometimes it hits me suddenly.',
-      'This wave of wanting to be with you.',
-      'Seeing you made me happy.',
-      'Hearing from you made me happy.',
-      'There’s something sacred about normal things.',
-      'All I need is someone I trust.',
-      'Writing to you helps.',
-      'It gives shape to the noise.',
-      'I feel a little off.',
-      'It was quiet. That was the goal.',
-      'Every day is a new day I guess.',
-      'I just carry it.',
-      'Like a thread stitched gently through every day.',
-      'I realized I had nothing to complain about.',
-      'Not in a forced way, but in a quiet way.',
-      'There is a kind of stillness.',
-      'And within that stillness, love moves more freely.',
-      'I think this is real.',
-      'It doesn’t feel like a coincidence.',
-      'I don’t need to worry.',
-      'It just is.',
-      'I wanted to tell you this.',
-      'I don’t know why exactly.',
-      'But it felt important.',
-      'Even if it’s simple.',
-      'Even if it’s obvious.',
-      'Still.',
-      'I nodded a lot, which felt like the correct response.',
-      'Closure had clearly been outsourced.',
-      'The only ones who still seem to have it figured out are the cats.',
-      'Unbothered. Self-sufficient. Still running the show.',
-      'Plans feel less like plans and more like vague suggestions.',
-      'The design turned out experimental.',
-      'More of a symbolic gesture than a functional object.',
-      'Like the movie was bad for us, specifically.',
-      'It felt oddly communal.',
-      'I think I might be in my dessert prime right now.',
-      'Honestly, I got emotionally attached to something insignificant again.',
-      'Dogs are good at that, I guess.',
-      'I am just rambling in this email.',
-      'I am a busy adult, not a lovesick teenager.',
-      'This does not support my narrative.',
-      'My memory is mush.',
-      'Everything is so mush.',
-      'Big adventure, small sleep.',
-      'That is the version of me you’re getting today.',
-      'That’s all folks!',
-      'More is more.',
-      'I was going to say something meaningful but lost it halfway.',
-      'This felt important five minutes ago.',
-      'I stand by the emotion, not the structure.',
-      'I think you would have laughed at this.',
-      'This is probably not helping but I’m sending it anyway.',
-      'Somehow this became sincere.',
-      'I didn’t plan to say this but here we are.',
-      'It feels small but also not small.',
-      'I am aware this is slightly ridiculous.',
-      'But also kind of true.',
-      'I think this counts as communication.',
-      'Emotionally this made sense at the time.'
-    ];
-
-    const wordPool = [
-      'love','stillness','distance','voice','thread','softness','clarity','weekend','memory','peace',
-      'ordinary','sacred','noise','echo','romantic','waiting','letter','tenderness','weather','city',
-      'pause','shape','warmth','trust','tired','light','absence','presence','quiet','screen',
-      'mailbox','room','feeling','affection','chaos','detail','routine','future','name','gesture',
-      'truth','longing','space','window','face','day','mush','cats','symbolic','experimental',
-      'unbothered','vague','dessert','prime','communal','reply'
-    ];
-
-    const screens = {
-      title: document.getElementById('titleScreen'),
-      words: document.getElementById('wordsScreen'),
-      form: document.getElementById('formScreen'),
-      letter: document.getElementById('letterScreen')
-    };
-
-    const titleTrigger = document.getElementById('titleTrigger');
-    const nameInput = document.getElementById('nameInput');
-    const generateBtn = document.getElementById('generateBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const letterText = document.getElementById('letterText');
-
-    let wordsTimer = null;
-    let typingTimer = null;
-
-    function showScreen(key){
-      Object.values(screens).forEach(el => el.classList.remove('active'));
-      screens[key].classList.add('active');
+    for(let i=1;i<6;i++){
+      const line=document.createElement('div');
+      line.className='grid-line';
+      line.style.left=(i*18)+'%';
+      document.getElementById('main').appendChild(line);
     }
-
-    function randomItem(arr){
-      return arr[Math.floor(Math.random() * arr.length)];
-    }
-
-    function fillWords(){
-      screens.words.innerHTML = '';
-      for(let i = 0; i < 150; i++){
-        const span = document.createElement('span');
-        span.className = 'word';
-        span.textContent = randomItem(wordPool);
-        span.style.top = (Math.random() * 92) + '%';
-        span.style.left = (Math.random() * 92) + '%';
-        span.style.fontSize = (11 + Math.random() * 16) + 'px';
-        span.style.opacity = (0.35 + Math.random() * 0.5).toFixed(2);
-        screens.words.appendChild(span);
-      }
-    }
-
-    function goToWords(){
-      fillWords();
-      showScreen('words');
-      window.clearTimeout(wordsTimer);
-      wordsTimer = window.setTimeout(() => {
-        showScreen('form');
-        nameInput.focus();
-      }, 3000);
-    }
-
-    function typeLetter(text){
-      window.clearInterval(typingTimer);
-      let i = 0;
-      letterText.innerHTML = '';
-
-      typingTimer = window.setInterval(() => {
-        i += 1;
-        const shown = text.slice(0, i);
-        letterText.innerHTML = shown + '<span class="cursor">|</span>';
-        if(i >= text.length){
-          window.clearInterval(typingTimer);
-          letterText.textContent = text;
-        }
-      }, 16);
-    }
-
-    function generateLetter(){
-      const name = nameInput.value.trim() || 'you';
-      const used = new Set();
-
-      function pickUnique(){
-        const available = phrasePool.filter(p => !used.has(p));
-        const chosen = available.length
-          ? available[Math.floor(Math.random() * available.length)]
-          : phrasePool[Math.floor(Math.random() * phrasePool.length)];
-        used.add(chosen);
-        return chosen;
-      }
-
-      const opener = pickUnique();
-      const emotional = pickUnique();
-      const funny = pickUnique();
-      const reflective = pickUnique();
-      const absurd = pickUnique();
-      const extra = pickUnique();
-
-      const body = [
-        opener,
-        emotional,
-        funny,
-        reflective,
-        absurd,
-        extra,
-        'I miss you.'
-      ].join(' ');
-
-      const finalLetter = `Dear ${name},
-
-${body}
-
-Yours,`;
-
-      showScreen('letter');
-      typeLetter(finalLetter);
-    }
-
-    function reset(){
-      nameInput.value = '';
-      letterText.textContent = '';
-      showScreen('form');
-      nameInput.focus();
-    }
-
-    titleTrigger.addEventListener('click', goToWords);
-    titleTrigger.addEventListener('keydown', (e) => {
-      if(e.key === 'Enter' || e.key === ' '){
-        e.preventDefault();
-        goToWords();
-      }
-    });
-
-    generateBtn.addEventListener('click', generateLetter);
-    resetBtn.addEventListener('click', reset);
   </script>
+
+  <!-- WINDOW -->
+  <div class="window" id="window">
+    <div class="window-header">
+      <div class="dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <div class="title">generate</div>
+    </div>
+
+    <div class="window-body" id="content">
+      click to begin
+    </div>
+  </div>
+
+</div>
+
+<script>
+let stage = 0;
+
+const phrases = [
+  'I miss you.',
+    'Every day is a new day I guess.',
+    'I just carry it.',
+    'Like a thread stitched gently through every day.',
+    'I realized I had nothing to complain about.',
+    'Not in a forced way, but in a quiet way.',
+    'There is a kind of stillness.',
+    'And within that stillness, love moves more freely.',
+    'I think this is real.',
+    'It doesn’t feel like a coincidence.',
+    'I don’t need to worry.',
+    'It just is.',
+    'I wanted to tell you this.',
+    'I don’t know why exactly.',
+    'But it felt important.',
+    'Even if it’s simple.',
+    'Even if it’s obvious.',
+    'Still.',
+    'I nodded a lot, which felt like the correct response.',
+    'Closure had clearly been outsourced.',
+    'The only ones who still seem to have it figured out are the cats.',
+    'Unbothered. Self-sufficient. Still running the show.',
+    'Plans feel less like plans and more like vague suggestions.',
+    'The design turned out experimental.',
+    'More of a symbolic gesture than a functional object.',
+    'Like the movie was bad for us, specifically.',
+    'It felt oddly communal.',
+    'I think I might be in my dessert prime right now.',
+    'Honestly, I got emotionally attached to something insignificant again.',
+    'Dogs are good at that, I guess.',
+    'I am just rambling in this email.',
+    'I am a busy adult, not a lovesick teenager.',
+    'This does not support my narrative.',
+    'My memory is mush.',
+    'Everything is so mush.',
+    'Big adventure, small sleep.',
+    'That is the version of me you’re getting today.',
+    'That’s all folks!',
+    'More is more.',
+    'I was going to say something meaningful but lost it halfway.',
+    'This felt important five minutes ago.',
+    'I stand by the emotion, not the structure.',
+    'I think you would have laughed at this.',
+    'This is probably not helping but I’m sending it anyway.',
+    'Somehow this became sincere.',
+    'I didn’t plan to say this but here we are.',
+    'It feels small but also not small.',
+    'I am aware this is slightly ridiculous.',
+    'But also kind of true.',
+    'I think this counts as communication.',
+    'Emotionally this made sense at the time.'
+];
+
+const words = ["love","memory","thread","softness","chaos","stillness","distance","letter"];
+
+document.getElementById('window').onclick = () => {
+  if(stage === 0){
+    generateWords();
+    stage = 1;
+    setTimeout(showInput,3000);
+  }
+};
+
+function generateWords(){
+  for(let i=0;i<120;i++){
+    const span=document.createElement('span');
+    span.className='word';
+    span.innerText=words[Math.floor(Math.random()*words.length)];
+    span.style.top=Math.random()*100+'%';
+    span.style.left=Math.random()*100+'%';
+    document.body.appendChild(span);
+  }
+}
+
+function showInput(){
+  document.getElementById('content').innerHTML = `
+    <div>enter a name</div>
+    <input id="name">
+    <button onclick="generateLetter()">generate</button>
+  `;
+}
+
+function generateLetter(){
+  const name=document.getElementById('name').value || 'you';
+
+  let text = `Dear ${name},\n\n`;
+
+  for(let i=0;i<6;i++){
+    text += phrases[Math.floor(Math.random()*phrases.length)] + " ";
+  }
+
+  text += "\n\nYours,";
+
+  document.getElementById('content').innerHTML = `<pre>${text}</pre>`;
+}
+</script>
+
 </body>
 </html>
