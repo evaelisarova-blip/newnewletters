@@ -285,13 +285,17 @@ document.getElementById('window').onclick = () => {
 };
 
 function generateWords(){
-  for(let i=0;i<120;i++){
-    const span=document.createElement('span');
-    span.className='word';
-    span.innerText=words[Math.floor(Math.random()*words.length)];
-    span.style.top=Math.random()*100+'%';
-    span.style.left=Math.random()*100+'%';
-    document.body.appendChild(span);
+  const main = document.getElementById('main');
+
+  document.querySelectorAll('.word').forEach(word => word.remove());
+
+  for(let i = 0; i < 120; i++){
+    const span = document.createElement('span');
+    span.className = 'word';
+    span.innerText = words[Math.floor(Math.random() * words.length)];
+    span.style.top = Math.random() * 100 + '%';
+    span.style.left = Math.random() * 100 + '%';
+    main.appendChild(span);
   }
 }
 
